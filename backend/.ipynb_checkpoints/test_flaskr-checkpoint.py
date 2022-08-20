@@ -15,8 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.username = "postgres"
-        self.password = "postgres"
+        self.username = "student"
+        self.password = "student"
         self.database_path = "postgresql://{}:{}@{}/{}".format(self.username, self.password,'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
@@ -53,8 +53,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['status'], True)
         self.assertTrue(len(data['questions']))
         self.assertTrue(data['categories'])
-        self.assertTrue(data['current_category'])
-
+        
 
     def test_getting_out_of_range_questions(self):
         res = self.client().get("/questions?page=100000000")
@@ -113,13 +112,19 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
 
     def test_search_questions_by_searchterm(self):
-        res = self.client().post("/questions/search", json={"searchTerm": "title"})
+        res = self.client().post("/questions/search", json={"searchTerm": "a"})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
-        self.assertTrue(data['current_category'])
+        
+    def test_search_questions_by_non_existing_searchterm(self):
+        res = self.client().post("/questions/search", json={"searchTerm": "abcdefghij"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['total_questions'], 0)
 
     def test_get_category_questions(self):
         categories = Category.query
@@ -146,7 +151,7 @@ class TriviaTestCase(unittest.TestCase):
             "previous_questions": [],
             "quiz_category": 1
         })
-        data = res.get_json()
+        data = json.loads(res.data)
         
         
         self.assertEqual(res.status_code, 200)
