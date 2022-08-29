@@ -213,7 +213,7 @@ def create_app(test_config=None):
         previous_questions = data['previous_questions']
         quiz_category = data['quiz_category']
 
-        if quiz_category['id'] == 0:
+        if quiz_category == 0:
             questions = Question.query.all()
         else:
             questions = Question.query.filter_by(category = quiz_category['id']).all()
@@ -269,7 +269,7 @@ def create_app(test_config=None):
         }), 422
 
     @app.errorhandler(405)
-    def bad_request(error):
+    def method_not_allowed(error):
         return jsonify({
             "status": False,
             "message": "method_not_allowed",
